@@ -1,11 +1,13 @@
 // src/pages/Home.jsx
 import Hero from '../components/Hero'
 import Navbar from '../components/Navbar'
+import ScrollButtons from '../components/ScrollButtons'
 
 function Home() {
   return (
     <div className="min-h-screen">
       <Navbar />
+      <ScrollButtons />
       
       <section id="home">
         <Hero />
