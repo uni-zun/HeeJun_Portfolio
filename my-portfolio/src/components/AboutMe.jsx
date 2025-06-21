@@ -43,12 +43,18 @@ export default function AboutMe() {
     {
       title: "Main Stack",
       icon: Code,
-      skills: ["React.js", "JavaScript", "Tailwind CSS", "Framer Motion"],
+      skills: ["React.js", "JavaScript"],
     },
     {
       title: "Additional Stack",
       icon: Layers,
-      skills: ["Flutter", "Kotlin", "TypeScript"],
+      skills: [
+        "Tailwind CSS",
+        "Framer Motion",
+        "TypeScript",
+        "Flutter",
+        "Kotlin",
+      ],
     },
     {
       title: "Tools",
