@@ -59,7 +59,7 @@ export default function AboutMe() {
     {
       title: "Tools",
       icon: Settings,
-      skills: ["Git (GitHub/GitLab)", "VS Code", "Jira", "Notion"],
+      skills: ["Git (GitHub/GitLab)", "VS Code", "Jira", "Notion", "Slack"],
     },
   ];
 

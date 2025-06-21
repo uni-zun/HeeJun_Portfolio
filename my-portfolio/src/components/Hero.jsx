@@ -9,11 +9,15 @@ import { useRef, useEffect } from "react";
 
 export default function Hero() {
   const ref = useRef(null);
-  const { scrollYProgress } = useScroll({ target: ref });
-  const textY = useTransform(scrollYProgress, [0, 1], [-150, 150]);
-  const imageY = useTransform(scrollYProgress, [0, 1], [-100, 100]);
+  const { scrollY } = useScroll();
 
-  // 마우스 인터랙션 (미세한 움직임)
+  // 해체 애니메이션 (추가된 부분)
+  const textFade = useTransform(scrollY, [0, 400], [1, 0]);
+  const textExitY = useTransform(scrollY, [0, 400], [0, -80]);
+  const imageFade = useTransform(scrollY, [0, 400], [1, 0]);
+  const imageExitY = useTransform(scrollY, [0, 400], [0, 100]);
+
+  // 마우스 인터랙션
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const springConfig = { damping: 30, stiffness: 200 };
@@ -23,10 +27,8 @@ export default function Hero() {
     const handleMouseMove = (e) => {
       const { clientX, clientY } = e;
       const { innerWidth, innerHeight } = window;
-
       const x = (clientX - innerWidth / 2) / (innerWidth / 2);
       const y = (clientY - innerHeight / 2) / (innerHeight / 2);
-
       mouseX.set(x * 8);
       mouseY.set(y * 8);
     };
@@ -40,7 +42,7 @@ export default function Hero() {
       ref={ref}
       className="h-screen flex items-center justify-center relative bg-gradient-to-br from-white via-gray-200 to-gray-800 overflow-hidden"
     >
-      {/* 미니멀 파티클 */}
+      {/* 파티클 */}
       <div className="absolute inset-0">
         {[...Array(8)].map((_, i) => (
           <motion.div
@@ -66,10 +68,11 @@ export default function Hero() {
 
       <div className="max-w-6xl mx-auto px-6 w-full mb-50 relative z-10">
         <div className="grid md:grid-cols-2 gap-8 lg:gap-16 items-center">
-          {/* 왼쪽 프로필 이미지 */}
+          {/* 프로필 이미지 */}
           <motion.div
             style={{
-              y: imageY,
+              y: imageExitY,
+              opacity: imageFade,
               x: mouseXSpring,
               rotateY: useTransform(mouseXSpring, [-8, 8], [-2, 2]),
             }}
@@ -88,20 +91,15 @@ export default function Hero() {
             }}
           >
             <div className="w-[350px] md:w-[450px] lg:w-[520px] aspect-[440/566] relative overflow-hidden group">
-              {/* 미세한 그림자 효과 */}
               <motion.div
                 className="absolute inset-0 bg-black/5 blur-xl transform translate-x-2 translate-y-2"
-                animate={{
-                  opacity: [0.1, 0.2, 0.1],
-                }}
+                animate={{ opacity: [0.1, 0.2, 0.1] }}
                 transition={{
                   duration: 3,
                   repeat: Infinity,
                   ease: "easeInOut",
                 }}
               />
-
-              {/* 호버 시 미세한 테두리 */}
               <motion.div
                 className="absolute inset-0 border border-gray-300/0 rounded-lg"
                 whileHover={{
@@ -109,7 +107,6 @@ export default function Hero() {
                   transition: { duration: 0.3 },
                 }}
               />
-
               <img
                 src="/images/profile.png"
                 alt="윤희준 프로필"
@@ -124,10 +121,11 @@ export default function Hero() {
             </div>
           </motion.div>
 
-          {/* 오른쪽 텍스트 콘텐츠 */}
+          {/* 텍스트 콘텐츠 */}
           <motion.div
             style={{
-              y: textY,
+              y: textExitY,
+              opacity: textFade,
               x: useTransform(mouseXSpring, [-8, 8], [2, -2]),
             }}
             initial={{ opacity: 0, x: 100 }}
@@ -152,7 +150,6 @@ export default function Hero() {
                 <br />
                 프론트엔드 개발자
                 <br />
-                {/* 이름 부분 강화 */}
                 <motion.span
                   className="font-bold text-gray-900 bg-gradient-to-r from-gray-700 via-gray-900 to-black bg-clip-text text-transparent inline-block mt-2 text-5xl md:text-6xl lg:text-7xl relative"
                   initial={{ scale: 0.9, opacity: 0 }}
@@ -200,7 +197,8 @@ export default function Hero() {
           </motion.div>
         </div>
       </div>
-      {/* 웨이브 1 (뒤쪽 흐림 처리) */}
+
+      {/* 웨이브 */}
       <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0] rotate-180">
         <svg
           className="relative block w-full h-[100px]"
@@ -215,8 +213,6 @@ export default function Hero() {
           />
         </svg>
       </div>
-
-      {/* 웨이브 2 (앞쪽 진한 곡선) */}
       <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0] rotate-180">
         <svg
           className="relative block w-full h-[80px]"
