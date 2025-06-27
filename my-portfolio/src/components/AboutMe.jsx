@@ -70,7 +70,6 @@ export default function AboutMe() {
       title: "디지털 사이니지 CMS",
       subtitle: "WAA Player",
       result: "우수상",
-      company: "삼성전자",
     },
     {
       type: "award",
@@ -78,15 +77,13 @@ export default function AboutMe() {
       title: "웹 기반 보드게임 플랫폼",
       subtitle: "GAME PLANET",
       result: "우수상",
-      company: "삼성전자",
     },
     {
       type: "education",
       period: "2024.07 ~ 2025.06",
       title: "삼성 청년 SW 아카데미",
       subtitle: "12기 교육과정",
-      result: "진행 중",
-      company: "",
+      result: "수료",
     },
     {
       type: "education",
@@ -94,7 +91,6 @@ export default function AboutMe() {
       title: "조선대학교 수학과",
       subtitle: "학사 학위",
       result: "졸업",
-      company: "",
     },
   ];
 
@@ -203,14 +199,6 @@ export default function AboutMe() {
         transition: ANIMATION_CONFIG.spring,
       }}
     >
-      {/* 타임라인 포인트 */}
-      <motion.div
-        className="relative z-10 w-4 h-4 bg-white border-2 border-gray-300 rounded-full mr-8 mt-2 transition-colors duration-300"
-        whileHover={{ scale: 1.2 }}
-      >
-        <motion.div className="absolute inset-0.5 bg-gray-900 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      </motion.div>
-
       {/* 컨텐츠 */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-2">
@@ -230,11 +218,6 @@ export default function AboutMe() {
           <span className="text-sm font-medium text-gray-900">
             {item.result}
           </span>
-          {item.company && (
-            <span className="text-xs text-gray-500 font-light">
-              {item.company}
-            </span>
-          )}
         </div>
       </div>
     </motion.div>
@@ -302,7 +285,7 @@ export default function AboutMe() {
             <div className="relative">
               {/* 세로 라인 */}
               <motion.div
-                className="absolute left-8 top-0 w-px bg-gray-200"
+                className="absolute left-0 top-0 w-px bg-gray-200"
                 initial={{ height: 0 }}
                 animate={isInView ? { height: "100%" } : {}}
                 transition={{
@@ -311,7 +294,7 @@ export default function AboutMe() {
                 }}
               />
 
-              <div className="space-y-12">
+              <div className="space-y-12 pl-8">
                 {achievements.map(renderTimelineItem)}
               </div>
             </div>
