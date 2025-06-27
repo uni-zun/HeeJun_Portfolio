@@ -6,6 +6,7 @@ export default function AboutMe() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [celebrationActive, setCelebrationActive] = useState(false);
+  const [hasClickedBefore, setHasClickedBefore] = useState(false);
 
   // 상수 분리
   const MAIN_SKILLS = ["React.js", "JavaScript"];
@@ -82,7 +83,7 @@ export default function AboutMe() {
     {
       type: "education",
       period: "2024.07 ~ 2025.06",
-      title: "삼성 청년 SW AI 아카데미",
+      title: "삼성 청년 SW 아카데미",
       subtitle: "12기 교육과정",
       result: "수료",
     },
@@ -98,6 +99,7 @@ export default function AboutMe() {
   // 축하 이펙트 트리거
   const triggerCelebration = () => {
     setCelebrationActive(true);
+    setHasClickedBefore(true);
     setTimeout(() => setCelebrationActive(false), 3000);
   };
 
@@ -343,7 +345,9 @@ export default function AboutMe() {
     <motion.div
       key={index}
       variants={itemVariants}
-      className="relative flex items-start group cursor-pointer"
+      className={`relative flex items-start group ${
+        item.type === "award" ? "cursor-pointer" : ""
+      }`}
       whileHover={{
         x: 8,
         transition: ANIMATION_CONFIG.spring,
@@ -354,6 +358,36 @@ export default function AboutMe() {
         }
       }}
     >
+      {/* 은은한 클릭 힌트 - 프로젝트 위에 가로 화살표 3개 */}
+      {item.type === "award" && !hasClickedBefore && (
+        <motion.div
+          className="absolute -top-6 left-1/4 transform -translate-x-1/2 flex items-center gap-1"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.5 }}
+          transition={{
+            delay: 1,
+            duration: 0.8,
+            ease: "easeInOut",
+          }}
+        >
+          {[...Array(3)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="text-gray-400 text-sm"
+              animate={{ y: [0, 4, 0] }}
+              transition={{
+                duration: 1.2,
+                repeat: Infinity,
+                delay: i * 0.15,
+                ease: "easeInOut",
+              }}
+            >
+              ↓
+            </motion.div>
+          ))}
+        </motion.div>
+      )}
+
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-gray-500 tracking-wide">
