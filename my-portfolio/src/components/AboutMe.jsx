@@ -1,10 +1,11 @@
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { motion, useInView, AnimatePresence } from "framer-motion";
+import { useRef, useState } from "react";
 import { Code, Layers, Settings, Award, GraduationCap } from "lucide-react";
 
 export default function AboutMe() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [celebrationActive, setCelebrationActive] = useState(false);
 
   // 상수 분리
   const MAIN_SKILLS = ["React.js", "JavaScript"];
@@ -81,7 +82,7 @@ export default function AboutMe() {
     {
       type: "education",
       period: "2024.07 ~ 2025.06",
-      title: "삼성 청년 SW 아카데미",
+      title: "삼성 청년 SW AI 아카데미",
       subtitle: "12기 교육과정",
       result: "수료",
     },
@@ -93,6 +94,155 @@ export default function AboutMe() {
       result: "졸업",
     },
   ];
+
+  // 축하 이펙트 트리거
+  const triggerCelebration = () => {
+    setCelebrationActive(true);
+    setTimeout(() => setCelebrationActive(false), 3000);
+  };
+
+  // 축하 이펙트 컴포넌트
+  const CelebrationEffect = () => {
+    if (typeof window === "undefined") return null;
+
+    const medals = Array.from({ length: 12 }, (_, i) => ({
+      id: i,
+      delay: i * 0.08,
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight * 0.7 + window.innerHeight * 0.1,
+    }));
+
+    const celebrationEmojis = [
+      "🏅",
+      "🎉",
+      "✨",
+      "🎊",
+      "🌟",
+      "💫",
+      "⭐",
+      "🎈",
+      "🎁",
+      "🏆",
+      "🥇",
+      "👏",
+      "🎯",
+      "💎",
+      "🔥",
+      "💯",
+    ];
+
+    const diverseEmojis = Array.from({ length: 16 }, (_, i) => ({
+      id: i,
+      emoji:
+        celebrationEmojis[Math.floor(Math.random() * celebrationEmojis.length)],
+      delay: i * 0.12,
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      size: Math.random() * 15 + 25, // 25px ~ 40px
+    }));
+
+    return (
+      <AnimatePresence mode="wait">
+        {celebrationActive && (
+          <motion.div
+            className="fixed inset-0 pointer-events-none z-50 overflow-hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {/* 메달들 - 최적화된 애니메이션 */}
+            {medals.map((medal) => (
+              <motion.div
+                key={medal.id}
+                className="absolute text-4xl select-none will-change-transform"
+                style={{
+                  left: medal.x,
+                  top: medal.y,
+                }}
+                initial={{
+                  scale: 0,
+                  rotate: 0,
+                  y: 0,
+                }}
+                animate={{
+                  scale: [0, 1.3, 1],
+                  rotate: 360,
+                  y: -200,
+                }}
+                exit={{
+                  scale: 0,
+                  opacity: 0,
+                }}
+                transition={{
+                  duration: 2,
+                  delay: medal.delay,
+                  ease: "easeOut",
+                }}
+              >
+                🏅
+              </motion.div>
+            ))}
+
+            {/* 다양한 축하 이모지들 - 단순화된 애니메이션 */}
+            {diverseEmojis.map((item) => (
+              <motion.div
+                key={`emoji-${item.id}`}
+                className="absolute select-none will-change-transform"
+                style={{
+                  left: item.x,
+                  top: item.y,
+                  fontSize: `${item.size}px`,
+                }}
+                initial={{
+                  scale: 0,
+                  opacity: 0,
+                }}
+                animate={{
+                  scale: [0, 1.2, 0.9, 0],
+                  opacity: [0, 1, 0.8, 0],
+                  y: -150,
+                  x: (Math.random() - 0.5) * 50,
+                }}
+                transition={{
+                  duration: 2.2,
+                  delay: item.delay,
+                  ease: "easeOut",
+                }}
+              >
+                {item.emoji}
+              </motion.div>
+            ))}
+
+            {/* 반짝이 효과 - 개수 늘리고 최적화 */}
+            {Array.from({ length: 20 }).map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-2 h-2 bg-yellow-400 rounded-full will-change-transform"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                }}
+                initial={{
+                  scale: 0,
+                  opacity: 0,
+                }}
+                animate={{
+                  scale: [0, 1, 0],
+                  opacity: [0, 1, 0],
+                }}
+                transition={{
+                  duration: 1.5,
+                  delay: Math.random() * 1,
+                  ease: "easeInOut",
+                }}
+              />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  };
 
   // 스킬 스타일링 헬퍼 함수
   const getSkillStyles = (skill) => {
@@ -198,8 +348,12 @@ export default function AboutMe() {
         x: 8,
         transition: ANIMATION_CONFIG.spring,
       }}
+      onClick={() => {
+        if (item.type === "award") {
+          triggerCelebration();
+        }
+      }}
     >
-      {/* 컨텐츠 */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-gray-500 tracking-wide">
@@ -208,11 +362,11 @@ export default function AboutMe() {
           {renderTimelineIcon(item)}
         </div>
 
-        <h4 className="text-lg font-medium text-gray-900 mb-1 group-hover:text-gray-700 transition-colors duration-300">
+        <div className="text-lg font-medium text-gray-900 mb-1 group-hover:text-gray-700 transition-colors duration-300">
           {item.title}
-        </h4>
+        </div>
 
-        <p className="text-gray-600 font-light mb-2">{item.subtitle}</p>
+        <div className="text-gray-600 font-light mb-2">{item.subtitle}</div>
 
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-gray-900">
@@ -301,6 +455,9 @@ export default function AboutMe() {
           </motion.div>
         </div>
       </div>
+
+      {/* 축하 이펙트 */}
+      <CelebrationEffect />
     </section>
   );
 }
