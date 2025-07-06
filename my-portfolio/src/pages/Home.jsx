@@ -2,8 +2,9 @@
 import Hero from "../components/Hero";
 import Navbar from "../components/Navbar";
 import ScrollButtons from "../components/ScrollButtons";
-import AboutMe
- from "../components/AboutMe";
+import AboutMe from "../components/AboutMe";
+import Projects from "../components/Projects";
+
 function Home() {
   return (
     <div className="min-h-screen">
@@ -18,16 +19,8 @@ function Home() {
         <AboutMe />
       </section>
 
-      <section
-        id="projects"
-        className="min-h-screen bg-white flex items-center justify-center"
-      >
-        <div className="text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">Projects</h2>
-          <p className="text-gray-600">
-            Projects 섹션이 여기에 들어갈 예정입니다
-          </p>
-        </div>
+      <section id="projects">
+        <Projects />
       </section>
 
       <section
