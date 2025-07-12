@@ -166,8 +166,8 @@ export default function Hero() {
               </motion.h1>
             </div>
 
-            {/* 서브 멘트 */}
-            <motion.p
+            {/* 서브 멘트 - 여기가 수정된 부분! */}
+            <motion.div
               className="text-xl md:text-2xl lg:text-3xl text-gray-700 font-light leading-relaxed"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -177,7 +177,7 @@ export default function Hero() {
               <br />
               사용자에게{" "}
               <motion.span
-                className="font-medium text-gray-800 relative"
+                className="font-medium text-gray-800 relative inline-block"
                 whileHover={{
                   color: "#1f2937",
                   transition: { duration: 0.2 },
@@ -193,7 +193,7 @@ export default function Hero() {
               </motion.span>
               을<br />
               만드는 개발을 지향합니다.
-            </motion.p>
+            </motion.div>
           </motion.div>
         </div>
       </div>

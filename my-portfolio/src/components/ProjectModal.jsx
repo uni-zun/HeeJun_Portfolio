@@ -65,21 +65,21 @@ export default function ProjectModal({ project, isOpen, onClose }) {
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-2xl shadow-2xl border border-white/10"
+          className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-gray-50 to-gray-100 rounded-2xl shadow-2xl border border-gray-200"
         >
           {/* 닫기 버튼 */}
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors z-10"
+            className="absolute top-6 right-6 w-10 h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center transition-colors z-10 shadow-lg"
           >
-            <X className="w-5 h-5 text-white" />
+            <X className="w-5 h-5 text-gray-600" />
           </button>
 
           <div className="p-8 md:p-12">
             {/* 헤더 */}
             <div className="mb-8">
               <div className="flex items-center gap-4 mb-4">
-                <project.icon className="w-10 h-10 text-white/70" />
+                <project.icon className="w-10 h-10 text-gray-700" />
                 {project.hasAward && (
                   <div className="flex items-center gap-2 px-4 py-2 bg-gray-500/90 backdrop-blur-sm rounded-full">
                     <Award className="w-5 h-5 text-white" />
@@ -88,14 +88,14 @@ export default function ProjectModal({ project, isOpen, onClose }) {
                 )}
               </div>
 
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
                 {project.title}
               </h2>
-              <p className="text-xl text-white/80 font-light mb-6">
+              <p className="text-xl text-gray-600 font-light mb-6">
                 {project.subtitle}
               </p>
 
-              <div className="flex flex-wrap items-center gap-6 text-white/70">
+              <div className="flex flex-wrap items-center gap-6 text-gray-700">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-5 h-5" />
                   <span>{project.period}</span>
@@ -104,10 +104,10 @@ export default function ProjectModal({ project, isOpen, onClose }) {
                   <Users className="w-5 h-5" />
                   <span>{project.teamSize}</span>
                 </div>
-                <div className="px-3 py-1 bg-white/20 rounded-full text-sm">
+                <div className="px-3 py-1 bg-gray-200 rounded-full text-sm">
                   {project.duration}
                 </div>
-                <div className="px-3 py-1 bg-white/20 rounded-full text-sm">
+                <div className="px-3 py-1 bg-gray-200 rounded-full text-sm">
                   {project.result}
                 </div>
               </div>

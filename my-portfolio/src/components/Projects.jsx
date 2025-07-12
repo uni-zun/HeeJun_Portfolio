@@ -1,11 +1,27 @@
-import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useInView,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 import { useRef, useState, useMemo, useCallback } from "react";
-import { Award, Smartphone, Globe, Calendar, Users, Monitor } from "lucide-react";
+import {
+  Award,
+  Smartphone,
+  Globe,
+  Calendar,
+  Users,
+  Monitor,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import ProjectModal from "./ProjectModal";
 
 export default function Projects() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [currentProject, setCurrentProject] = useState(0);
   const [selectedProject, setSelectedProject] = useState(null);
   const { scrollY } = useScroll();
 
@@ -26,7 +42,7 @@ export default function Projects() {
           "TypeScript",
           "Electron",
           "Tailwind CSS",
-          "Justand",
+          "Zustand",
         ],
         image: "/images/waa-player.gif",
         icon: Monitor,
@@ -83,6 +99,28 @@ export default function Projects() {
     []
   );
 
+  const nextProject = useCallback(() => {
+    setCurrentProject((prev) => (prev + 1) % projects.length);
+  }, [projects.length]);
+
+  const prevProject = useCallback(() => {
+    setCurrentProject((prev) => (prev - 1 + projects.length) % projects.length);
+  }, [projects.length]);
+
+  const goToProject = useCallback((index) => {
+    setCurrentProject(index);
+  }, []);
+
+  const openModal = useCallback((project) => {
+    setSelectedProject(project);
+    document.body.style.overflow = "hidden";
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setSelectedProject(null);
+    document.body.style.overflow = "unset";
+  }, []);
+
   const containerVariants = useMemo(
     () => ({
       hidden: { opacity: 0 },
@@ -118,15 +156,35 @@ export default function Projects() {
     []
   );
 
-  const openModal = useCallback((project) => {
-    setSelectedProject(project);
-    document.body.style.overflow = "hidden";
-  }, []);
+  const slideVariants = {
+    enter: (direction) => ({
+      x: direction > 0 ? 300 : -300,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 30,
+        duration: 0.3,
+      },
+    },
+    exit: (direction) => ({
+      x: direction < 0 ? 300 : -300,
+      opacity: 0,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 30,
+        duration: 0.3,
+      },
+    }),
+  };
 
-  const closeModal = useCallback(() => {
-    setSelectedProject(null);
-    document.body.style.overflow = "unset";
-  }, []);
+  const project = projects[currentProject];
+  const IconComponent = project.icon;
 
   return (
     <>
@@ -160,137 +218,185 @@ export default function Projects() {
               variants={cardVariants}
               className="text-xl text-gray-600 font-light max-w-2xl mx-auto"
             >
-              카드를 클릭하여 프로젝트의 상세 정보를 확인해보세요
+              화살표를 이용해 프로젝트를 탐색하고 카드를 클릭해 상세 정보를
+              확인해보세요
             </motion.p>
           </motion.div>
 
-          {/* 프로젝트 카드 그리드 */}
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate={isInView ? "visible" : "hidden"}
-            className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto"
-          >
-            {projects.map((project, index) => {
-              const IconComponent = project.icon;
+          {/* 캐러셀 컨테이너 */}
+          <div className="relative max-w-4xl mx-auto">
+            {/* 이전/다음 버튼 */}
+            <button
+              onClick={prevProject}
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 w-16 h-16 bg-gray-900 rounded-full shadow-2xl flex items-center justify-center hover:bg-gray-800 hover:scale-110 transition-all duration-200"
+              disabled={projects.length <= 1}
+            >
+              <ChevronLeft className="w-8 h-8 text-white" />
+            </button>
 
-              return (
+            <button
+              onClick={nextProject}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 w-16 h-16 bg-gray-900 rounded-full shadow-2xl flex items-center justify-center hover:bg-gray-800 hover:scale-110 transition-all duration-200"
+              disabled={projects.length <= 1}
+            >
+              <ChevronRight className="w-8 h-8 text-white" />
+            </button>
+
+            {/* 캐러셀 슬라이드 */}
+            <div
+              className="relative overflow-hidden rounded-2xl"
+              style={{ aspectRatio: "16/10" }}
+            >
+              <AnimatePresence mode="wait" custom={1}>
                 <motion.div
-                  key={project.id}
-                  variants={cardVariants}
-                  className="group cursor-pointer"
-                  onClick={() => openModal(project)}
-                  whileHover={{
-                    y: -8,
-                    scale: 1.02,
-                    transition: { type: "spring", stiffness: 400, damping: 25 },
-                  }}
-                  whileTap={{ scale: 0.98 }}
+                  key={currentProject}
+                  custom={1}
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  className="absolute inset-0 w-full h-full"
                 >
-                  <div
-                    className="relative rounded-2xl shadow-xl border border-white/20 overflow-hidden h-80 bg-cover bg-center bg-no-repeat"
-                    style={{
-                      backgroundImage: `url(${project.image})`,
+                  <motion.div
+                    className="group cursor-pointer w-full h-full"
+                    onClick={() => openModal(project)}
+                    whileHover={{
+                      scale: 1.02,
+                      transition: {
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 25,
+                      },
                     }}
+                    whileTap={{ scale: 0.98 }}
                   >
-                    {/* 오버레이 그라데이션 */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent group-hover:from-black/90 group-hover:via-black/40 transition-all duration-300" />
+                    <div
+                      className="relative w-full h-full bg-cover bg-center bg-no-repeat rounded-2xl shadow-2xl border border-white/20 overflow-hidden"
+                      style={{
+                        backgroundImage: `url(${project.image})`,
+                      }}
+                    >
+                      {/* 오버레이 그라데이션 */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent group-hover:from-black/90 group-hover:via-black/40 transition-all duration-300" />
 
-                    {/* 우수상 뱃지 */}
-                    {project.hasAward && (
-                      <motion.div
-                        className="absolute top-4 right-4 flex items-center gap-2 px-3 py-1 bg-gray-500/90 backdrop-blur-sm rounded-full shadow-lg"
-                        initial={{ rotate: -10, scale: 0 }}
-                        animate={{ rotate: 0, scale: 1 }}
-                        transition={{
-                          delay: 0.5 + index * 0.1,
-                          type: "spring",
-                        }}
-                      >
-                        <Award className="w-4 h-4 text-white" />
-                        <span className="text-xs font-bold text-white">
-                          우수상
+                      {/* 우수상 뱃지 - 회색 유지 */}
+                      {project.hasAward && (
+                        <motion.div
+                          className="absolute top-6 right-6 flex items-center gap-2 px-4 py-2 bg-gray-500/90 backdrop-blur-sm rounded-full shadow-lg"
+                          initial={{ rotate: -10, scale: 0 }}
+                          animate={{ rotate: 0, scale: 1 }}
+                          transition={{
+                            delay: 0.3,
+                            type: "spring",
+                          }}
+                        >
+                          <Award className="w-5 h-5 text-white" />
+                          <span className="text-sm font-bold text-white">
+                            우수상
+                          </span>
+                        </motion.div>
+                      )}
+
+                      {/* 프로젝트 아이콘 */}
+                      <div className="absolute top-6 left-6 p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
+                        <IconComponent className="w-8 h-8 text-white/90" />
+                      </div>
+
+                      {/* 프로젝트 번호 */}
+                      <div className="absolute top-6 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full">
+                        <span className="text-white/90 text-sm font-medium">
+                          {currentProject + 1} / {projects.length}
                         </span>
-                      </motion.div>
-                    )}
+                      </div>
 
-                    {/* 프로젝트 아이콘 */}
-                    <div className="absolute top-4 left-4 p-2 bg-white/20 backdrop-blur-sm rounded-full">
-                      <IconComponent className="w-6 h-6 text-white/90" />
-                    </div>
-
-                    {/* 메인 콘텐츠 */}
-                    <div className="relative z-10 h-full flex flex-col justify-end p-6">
-                      {/* 상단 정보 (호버 시 표시) */}
-                      <motion.div
-                        className="mb-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0"
-                        initial={false}
-                      >
-                        <div className="flex items-center gap-3 mb-3">
-                          <span className="text-sm font-medium text-white/90 bg-white/25 backdrop-blur-sm px-3 py-1 rounded-full">
-                            {project.period}
-                          </span>
-                          <span className="text-sm font-medium text-white bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
-                            {project.result}
-                          </span>
-                        </div>
-
-                        {/* 기술스택 미리보기 */}
-                        <div className="flex flex-wrap gap-2 mb-3">
-                          {project.techStack.slice(0, 3).map((tech) => (
-                            <span
-                              key={tech}
-                              className="px-2 py-1 bg-white/25 backdrop-blur-sm rounded text-xs text-white/90 border border-white/20"
-                            >
-                              {tech}
+                      {/* 메인 콘텐츠 */}
+                      <div className="relative z-10 h-full flex flex-col justify-end p-8 md:p-12">
+                        {/* 상단 정보 (호버 시 표시) */}
+                        <motion.div
+                          className="mb-6 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0"
+                          initial={false}
+                        >
+                          <div className="flex items-center gap-4 mb-4">
+                            <span className="text-base font-medium text-white/90 bg-white/25 backdrop-blur-sm px-4 py-2 rounded-full">
+                              {project.period}
                             </span>
-                          ))}
-                          {project.techStack.length > 3 && (
-                            <span className="px-2 py-1 bg-white/25 backdrop-blur-sm rounded text-xs text-white/90 border border-white/20">
-                              +{project.techStack.length - 3}
+                            <span className="text-base font-medium text-white bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                              {project.result}
                             </span>
-                          )}
-                        </div>
-
-                        {/* 팀 정보 */}
-                        <div className="flex items-center gap-4 text-white/80 text-sm">
-                          <div className="flex items-center gap-1">
-                            <Users className="w-4 h-4" />
-                            <span>{project.teamSize}</span>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Calendar className="w-4 h-4" />
-                            <span>{project.duration}</span>
+
+                          {/* 기술스택 미리보기 */}
+                          <div className="flex flex-wrap gap-3 mb-4">
+                            {project.techStack.slice(0, 4).map((tech) => (
+                              <span
+                                key={tech}
+                                className="px-3 py-2 bg-white/25 backdrop-blur-sm rounded-lg text-sm text-white/90 border border-white/20"
+                              >
+                                {tech}
+                              </span>
+                            ))}
+                            {project.techStack.length > 4 && (
+                              <span className="px-3 py-2 bg-white/25 backdrop-blur-sm rounded-lg text-sm text-white/90 border border-white/20">
+                                +{project.techStack.length - 4}
+                              </span>
+                            )}
                           </div>
-                        </div>
-                      </motion.div>
 
-                      {/* 하단 제목 (항상 표시) */}
-                      <div>
-                        <h3 className="text-2xl md:text-3xl font-bold text-white mb-2 group-hover:text-white/95 transition-colors drop-shadow-lg">
-                          {project.title}
-                        </h3>
+                          {/* 팀 정보 */}
+                          <div className="flex items-center gap-6 text-white/80 text-base">
+                            <div className="flex items-center gap-2">
+                              <Users className="w-5 h-5" />
+                              <span>{project.teamSize}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-5 h-5" />
+                              <span>{project.duration}</span>
+                            </div>
+                          </div>
+                        </motion.div>
 
-                        <p className="text-white/90 font-light leading-relaxed text-sm md:text-base drop-shadow-md line-clamp-2 group-hover:line-clamp-none transition-all duration-300">
-                          {project.subtitle}
-                        </p>
+                        {/* 하단 제목 (항상 표시) */}
+                        <div>
+                          <h3 className="text-4xl md:text-5xl font-bold text-white mb-4 group-hover:text-white/95 transition-colors drop-shadow-lg">
+                            {project.title}
+                          </h3>
 
-                        {/* 자세히 보기 표시 */}
-                        <div className="text-white/80 font-medium text-sm mt-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                          자세히 보기 →
+                          <p className="text-white/90 font-light leading-relaxed text-lg md:text-xl drop-shadow-md line-clamp-2 group-hover:line-clamp-none transition-all duration-300 mb-4">
+                            {project.subtitle}
+                          </p>
+
+                          {/* 자세히 보기 표시 */}
+                          <div className="text-white/80 font-medium text-lg opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                            자세히 보기 →
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* 이미지 로드 실패 시 폴백 */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black items-center justify-center hidden">
-                      <IconComponent className="w-24 h-24 text-white/40" />
+                      {/* 이미지 로드 실패 시 폴백 */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black items-center justify-center hidden">
+                        <IconComponent className="w-24 h-24 text-white/40" />
+                      </div>
                     </div>
-                  </div>
+                  </motion.div>
                 </motion.div>
-              );
-            })}
-          </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* 인디케이터 */}
+            <div className="flex justify-center mt-8 gap-3">
+              {projects.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => goToProject(index)}
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    index === currentProject
+                      ? "bg-gray-900 scale-125"
+                      : "bg-gray-300 hover:bg-gray-500"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </motion.section>
 
