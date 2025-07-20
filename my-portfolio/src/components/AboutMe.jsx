@@ -11,23 +11,18 @@ import { Code, Layers, Settings, Award, GraduationCap } from "lucide-react";
 export default function AboutMe() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const [celebrationActive, setCelebrationActive] = useState(false);
+  const [fireworksActive, setFireworksActive] = useState(false);
+  const [particles, setParticles] = useState([]);
   const [hasClickedBefore, setHasClickedBefore] = useState(false);
-
-  // 스크롤 기반 페이드아웃 효과
   const { scrollY } = useScroll();
 
-  // AboutMe 진입 효과 & 퇴장 효과
   const sectionFade = useTransform(scrollY, [200, 500], [0, 1]);
   const sectionEnterY = useTransform(scrollY, [200, 500], [50, 0]);
-
-  // AboutMe 퇴장 효과
   const skillsFade = useTransform(scrollY, [1200, 1800], [1, 0]);
   const skillsExitY = useTransform(scrollY, [1200, 1800], [0, -80]);
   const timelineFade = useTransform(scrollY, [1200, 1800], [1, 0]);
   const timelineExitY = useTransform(scrollY, [1200, 1800], [0, 100]);
 
-  // 상수 분리
   const MAIN_SKILLS = useMemo(() => ["React.js", "JavaScript"], []);
 
   const ANIMATION_CONFIG = useMemo(
@@ -35,7 +30,6 @@ export default function AboutMe() {
       spring: { stiffness: 400, damping: 25 },
       delays: { base: 0.3, category: 0.1, skill: 0.05 },
       duration: { timeline: 1, timelineDelay: 0.5 },
-      // 부드러운 애니메이션을 위한 최적화된 transition
       smoothTransition: { type: "spring", stiffness: 300, damping: 30 },
     }),
     []
@@ -47,7 +41,7 @@ export default function AboutMe() {
       visible: {
         opacity: 1,
         transition: {
-          staggerChildren: 0.08, 
+          staggerChildren: 0.08,
           delayChildren: 0.15,
           ease: [0.25, 0.46, 0.45, 0.94],
         },
@@ -65,8 +59,8 @@ export default function AboutMe() {
         transition: {
           type: "spring",
           stiffness: 400,
-          damping: 35, 
-          mass: 0.8, 
+          damping: 35,
+          mass: 0.8,
         },
       },
     }),
@@ -134,180 +128,72 @@ export default function AboutMe() {
     []
   );
 
-  // 축하 이펙트 데이터 미리 계산
-  const celebrationData = useMemo(() => {
-    if (typeof window === "undefined")
-      return { medals: [], diverseEmojis: [], celebrationEmojis: [] };
-
-    const medals = Array.from({ length: 12 }, (_, i) => ({
-      id: i,
-      delay: i * 0.08,
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight * 0.7 + window.innerHeight * 0.1,
-    }));
-
-    const celebrationEmojis = [
-      "🏅",
-      "🎉",
-      "✨",
-      "🎊",
-      "🌟",
-      "💫",
-      "⭐",
-      "🎈",
-      "🎁",
-      "🏆",
-      "🥇",
-      "👏",
-      "🎯",
-      "💎",
-      "🔥",
-      "💯",
-    ];
-
-    const diverseEmojis = Array.from({ length: 16 }, (_, i) => ({
-      id: i,
-      emoji:
-        celebrationEmojis[Math.floor(Math.random() * celebrationEmojis.length)],
-      delay: i * 0.12,
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
-      size: Math.random() * 15 + 25,
-    }));
-
-    return { medals, diverseEmojis, celebrationEmojis };
-  }, []);
-
-  // 축하 이펙트 트리거
-  const triggerCelebration = useCallback(() => {
-    setCelebrationActive(true);
+  const triggerFireworks = useCallback((e) => {
+    const centerX = e.clientX || window.innerWidth / 2;
+    const centerY = e.clientY || window.innerHeight / 2;
+    const newParticles = Array.from({ length: 24 }).map((_, i) => {
+      const angle = (i / 24) * 2 * Math.PI;
+      const radius = Math.random() * 150 + 100;
+      const x = centerX + Math.cos(angle) * radius;
+      const y = centerY + Math.sin(angle) * radius;
+      const delay = i * 0.01;
+      const size = Math.random() * 10 + 10;
+      return {
+        id: i,
+        x,
+        y,
+        startX: centerX,
+        startY: centerY,
+        delay,
+        size,
+        color: ["#facc15", "#f43f5e", "#f97316", "#fef08a"][i % 4],
+      };
+    });
+    setParticles(newParticles);
+    setFireworksActive(true);
     setHasClickedBefore(true);
-    setTimeout(() => setCelebrationActive(false), 3000);
+    setTimeout(() => setFireworksActive(false), 1400);
   }, []);
 
-  // 축하 이펙트 컴포넌트
-  const CelebrationEffect = useCallback(() => {
-    const { medals, diverseEmojis } = celebrationData;
-
-    return (
-      <AnimatePresence mode="wait">
-        {celebrationActive && (
+  const renderFireworks = useCallback(
+    () => (
+      <AnimatePresence>
+        {fireworksActive && (
           <motion.div
-            className="fixed inset-0 pointer-events-none z-50 overflow-hidden"
+            className="fixed inset-0 pointer-events-none z-50"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            transition={{ duration: 0.2 }}
           >
-            {/* 메달들 */}
-            {medals.map((medal) => (
+            {particles.map((p) => (
               <motion.div
-                key={medal.id}
-                className="absolute text-4xl select-none will-change-transform"
+                key={p.id}
+                className="absolute rounded-full"
                 style={{
-                  left: medal.x,
-                  top: medal.y,
+                  width: p.size,
+                  height: p.size,
+                  backgroundColor: p.color,
+                  left: p.startX,
+                  top: p.startY,
                 }}
-                initial={{
-                  scale: 0,
-                  rotate: 0,
-                  y: 0,
-                }}
+                initial={{ opacity: 1, scale: 1 }}
                 animate={{
-                  scale: [0, 1.3, 1],
-                  rotate: 360,
-                  y: -200,
+                  x: p.x - p.startX,
+                  y: p.y - p.startY,
+                  opacity: [1, 0.5, 0],
+                  scale: 0.5,
                 }}
-                exit={{
-                  scale: 0,
-                  opacity: 0,
-                }}
-                transition={{
-                  duration: 2,
-                  delay: medal.delay,
-                  ease: [0.25, 0.46, 0.45, 0.94],
-                }}
-              >
-                🏅
-              </motion.div>
-            ))}
-
-            {/* 다양한 축하 이모지들 */}
-            {diverseEmojis.map((item) => (
-              <motion.div
-                key={`emoji-${item.id}`}
-                className="absolute select-none will-change-transform"
-                style={{
-                  left: item.x,
-                  top: item.y,
-                  fontSize: `${item.size}px`,
-                }}
-                initial={{
-                  scale: 0,
-                  opacity: 0,
-                }}
-                animate={{
-                  scale: [0, 1.2, 0.9, 0],
-                  opacity: [0, 1, 0.8, 0],
-                  y: -150,
-                  x: (Math.random() - 0.5) * 50,
-                }}
-                transition={{
-                  duration: 2.2,
-                  delay: item.delay,
-                  ease: [0.34, 1.56, 0.64, 1],
-                }}
-              >
-                {item.emoji}
-              </motion.div>
-            ))}
-
-            {/* 반짝이 효과 */}
-            {Array.from({ length: 20 }).map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-2 h-2 bg-yellow-400 rounded-full will-change-transform"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                }}
-                initial={{
-                  scale: 0,
-                  opacity: 0,
-                }}
-                animate={{
-                  scale: [0, 1, 0],
-                  opacity: [0, 1, 0],
-                }}
-                transition={{
-                  duration: 1.5,
-                  delay: Math.random() * 1,
-                  ease: "easeInOut",
-                }}
+                transition={{ duration: 2.8, delay: p.delay }}
               />
             ))}
           </motion.div>
         )}
       </AnimatePresence>
-    );
-  }, [celebrationActive, celebrationData]);
-
-  // 스킬 스타일링 헬퍼 함수
-  const getSkillStyles = useCallback(
-    (skill) => {
-      const isMainSkill = MAIN_SKILLS.includes(skill);
-      return {
-        className: `font-light tracking-wide cursor-pointer relative ${
-          isMainSkill ? "text-gray-900 font-medium" : "text-gray-600"
-        }`,
-        hoverColor: isMainSkill ? "#000000" : "#1f2937",
-        underlineClass: "bg-gray-900",
-      };
-    },
-    [MAIN_SKILLS]
+    ),
+    [fireworksActive, particles]
   );
 
-  // 아이콘 컴포넌트 렌더링
   const renderTimelineIcon = useCallback((item) => {
     if (item.type === "award") {
       return (
@@ -322,87 +208,6 @@ export default function AboutMe() {
     return null;
   }, []);
 
-  // 스킬 아이템 렌더링
-  const renderSkillItem = useCallback(
-    (skill, skillIndex, categoryIndex) => {
-      const { className, hoverColor, underlineClass } = getSkillStyles(skill);
-      const animationDelay =
-        ANIMATION_CONFIG.delays.base +
-        categoryIndex * ANIMATION_CONFIG.delays.category +
-        skillIndex * ANIMATION_CONFIG.delays.skill;
-
-      return (
-        <motion.div
-          key={skillIndex}
-          className="relative"
-          initial={{ opacity: 0, x: -20 }}
-          animate={isInView ? { opacity: 1, x: 0 } : {}}
-          transition={{
-            delay: animationDelay,
-            type: "spring",
-            stiffness: 300,
-            damping: 30,
-            mass: 0.8,
-          }}
-        >
-          <motion.span
-            className={className}
-            whileHover={{
-              color: hoverColor,
-              x: 4,
-              transition: { duration: 0.2, ease: "easeOut" },
-            }}
-          >
-            {skill}
-            <motion.div
-              className={`absolute bottom-0 left-0 w-0 h-px ${underlineClass}`}
-              whileHover={{
-                width: "100%",
-                transition: { duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] },
-              }}
-            />
-          </motion.span>
-        </motion.div>
-      );
-    },
-    [getSkillStyles, isInView, ANIMATION_CONFIG.delays]
-  );
-
-  // 스킬 카테고리 렌더링
-  const renderSkillCategory = useCallback(
-    (category, index) => {
-      const IconComponent = category.icon;
-
-      return (
-        <motion.div key={index} variants={itemVariants} className="group">
-          <motion.div
-            className="flex items-center mb-6 cursor-pointer"
-            whileHover={{ x: 8 }}
-            transition={{
-              type: "spring",
-              stiffness: 400,
-              damping: 30,
-              mass: 0.6,
-            }}
-          >
-            <IconComponent className="w-5 h-5 text-gray-700 mr-4 transition-colors duration-200 ease-out" />
-            <h4 className="text-lg font-medium text-gray-900 tracking-wide">
-              {category.title}
-            </h4>
-          </motion.div>
-
-          <div className="space-y-3 ml-9">
-            {category.skills.map((skill, skillIndex) =>
-              renderSkillItem(skill, skillIndex, index)
-            )}
-          </div>
-        </motion.div>
-      );
-    },
-    [itemVariants, renderSkillItem]
-  );
-
-  // 타임라인 아이템 렌더링
   const renderTimelineItem = useCallback(
     (item, index) => (
       <motion.div
@@ -420,42 +225,12 @@ export default function AboutMe() {
             mass: 0.6,
           },
         }}
-        onClick={() => {
+        onClick={(e) => {
           if (item.type === "award") {
-            triggerCelebration();
+            triggerFireworks(e);
           }
         }}
       >
-        {/*클릭 힌트*/}
-        {item.type === "award" && !hasClickedBefore && (
-          <motion.div
-            className="absolute -top-6 left-1/4 transform -translate-x-1/2 flex items-center gap-1"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.5 }}
-            transition={{
-              delay: 1,
-              duration: 0.8,
-              ease: [0.25, 0.46, 0.45, 0.94],
-            }}
-          >
-            {[...Array(3)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="text-gray-400 text-sm"
-                animate={{ y: [0, 4, 0] }}
-                transition={{
-                  duration: 1.2,
-                  repeat: Infinity,
-                  delay: i * 0.15,
-                  ease: [0.25, 0.46, 0.45, 0.94],
-                }}
-              >
-                ↓
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-500 tracking-wide">
@@ -478,7 +253,7 @@ export default function AboutMe() {
         </div>
       </motion.div>
     ),
-    [itemVariants, hasClickedBefore, triggerCelebration, renderTimelineIcon]
+    [itemVariants, triggerFireworks, renderTimelineIcon]
   );
 
   return (
@@ -491,7 +266,6 @@ export default function AboutMe() {
       }}
     >
       <div className="max-w-7xl mx-auto px-6 relative z-10">
-        {/* 헤더 */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -510,17 +284,12 @@ export default function AboutMe() {
           />
         </motion.div>
 
-        {/* 메인 레이아웃 - 2열 그리드 */}
         <div className="grid lg:grid-cols-5 gap-16">
-          {/* 왼쪽: Skills - 2/5 */}
           <motion.div
             variants={containerVariants}
             initial="hidden"
             animate={isInView ? "visible" : "hidden"}
-            style={{
-              y: skillsExitY,
-              opacity: skillsFade,
-            }}
+            style={{ y: skillsExitY, opacity: skillsFade }}
             className="lg:col-span-2 space-y-12"
           >
             <motion.h3
@@ -529,19 +298,83 @@ export default function AboutMe() {
             >
               Technical Skills
             </motion.h3>
-
-            {skillCategories.map(renderSkillCategory)}
+            {skillCategories.map((category, index) => (
+              <motion.div key={index} variants={itemVariants} className="group">
+                <motion.div
+                  className="flex items-center mb-6 cursor-pointer"
+                  whileHover={{ x: 8 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 30,
+                    mass: 0.6,
+                  }}
+                >
+                  <category.icon className="w-5 h-5 text-gray-700 mr-4 transition-colors duration-200 ease-out" />
+                  <h4 className="text-lg font-medium text-gray-900 tracking-wide">
+                    {category.title}
+                  </h4>
+                </motion.div>
+                <div className="space-y-3 ml-9">
+                  {category.skills.map((skill, skillIndex) => (
+                    <motion.div
+                      key={skillIndex}
+                      className="relative"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={isInView ? { opacity: 1, x: 0 } : {}}
+                      transition={{
+                        delay:
+                          ANIMATION_CONFIG.delays.base +
+                          index * ANIMATION_CONFIG.delays.category +
+                          skillIndex * ANIMATION_CONFIG.delays.skill,
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 30,
+                        mass: 0.8,
+                      }}
+                    >
+                      <motion.span
+                        className={`font-light tracking-wide cursor-pointer relative ${
+                          MAIN_SKILLS.includes(skill)
+                            ? "text-gray-900 font-medium"
+                            : "text-gray-600"
+                        }`}
+                        whileHover={{
+                          color: MAIN_SKILLS.includes(skill)
+                            ? "#000000"
+                            : "#1f2937",
+                          x: 4,
+                          transition: { duration: 0.2, ease: "easeOut" },
+                        }}
+                      >
+                        {skill}
+                        <motion.div
+                          className={`absolute bottom-0 left-0 w-0 h-px ${
+                            MAIN_SKILLS.includes(skill)
+                              ? "bg-gray-900"
+                              : "bg-gray-900"
+                          }`}
+                          whileHover={{
+                            width: "100%",
+                            transition: {
+                              duration: 0.3,
+                              ease: [0.25, 0.46, 0.45, 0.94],
+                            },
+                          }}
+                        />
+                      </motion.span>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            ))}
           </motion.div>
 
-          {/* 오른쪽: Timeline - 3/5 */}
           <motion.div
             variants={containerVariants}
             initial="hidden"
             animate={isInView ? "visible" : "hidden"}
-            style={{
-              y: timelineExitY,
-              opacity: timelineFade,
-            }}
+            style={{ y: timelineExitY, opacity: timelineFade }}
             className="lg:col-span-3"
           >
             <motion.h3
@@ -550,10 +383,7 @@ export default function AboutMe() {
             >
               Journey & Achievements
             </motion.h3>
-
-            {/* 타임라인 */}
             <div className="relative">
-              {/* 세로 라인 */}
               <motion.div
                 className="absolute left-0 top-0 w-px bg-gray-200"
                 initial={{ height: 0 }}
@@ -564,7 +394,6 @@ export default function AboutMe() {
                   ease: [0.25, 0.46, 0.45, 0.94],
                 }}
               />
-
               <div className="space-y-12 pl-8">
                 {achievements.map(renderTimelineItem)}
               </div>
@@ -572,9 +401,7 @@ export default function AboutMe() {
           </motion.div>
         </div>
       </div>
-
-      {/* 축하 이펙트 */}
-      <CelebrationEffect />
+      {renderFireworks()}
     </motion.section>
   );
 }
