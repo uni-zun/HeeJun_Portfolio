@@ -214,32 +214,25 @@ export default function Projects() {
               variants={cardVariants}
               className="w-16 h-px bg-gray-900 mx-auto mb-8"
             />
-            <motion.p
-              variants={cardVariants}
-              className="text-xl text-gray-600 font-light max-w-2xl mx-auto"
-            >
-              화살표를 이용해 프로젝트를 탐색하고 카드를 클릭해 상세 정보를
-              확인해보세요
-            </motion.p>
           </motion.div>
 
           {/* 캐러셀 컨테이너 */}
           <div className="relative max-w-4xl mx-auto">
-            {/* 이전/다음 버튼 */}
+            {/* 이전/다음 버튼 - 아이콘만 */}
             <button
               onClick={prevProject}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 w-16 h-16 bg-gray-900 rounded-full shadow-2xl flex items-center justify-center hover:bg-gray-800 hover:scale-110 transition-all duration-200"
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full hover:bg-white/20 transition"
               disabled={projects.length <= 1}
             >
-              <ChevronLeft className="w-8 h-8 text-white" />
+              <ChevronLeft className="w-6 h-6 text-white" />
             </button>
 
             <button
               onClick={nextProject}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 w-16 h-16 bg-gray-900 rounded-full shadow-2xl flex items-center justify-center hover:bg-gray-800 hover:scale-110 transition-all duration-200"
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full hover:bg-white/20 transition"
               disabled={projects.length <= 1}
             >
-              <ChevronRight className="w-8 h-8 text-white" />
+              <ChevronRight className="w-6 h-6 text-white" />
             </button>
 
             {/* 캐러셀 슬라이드 */}
