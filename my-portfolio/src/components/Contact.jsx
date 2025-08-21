@@ -1,83 +1,197 @@
-import { Mail, Github, MapPin, Cake } from "lucide-react";
-import { motion } from "framer-motion";
+// src/components/Contact.jsx
+import { useState, useMemo, useRef } from "react";
+import { motion, useReducedMotion, useInView } from "framer-motion";
+import { Mail, Github, MapPin, CalendarDays, Copy } from "lucide-react";
 
-export default function Contact() {
-  return (
-    <section
-      id="contact"
-      className="relative bg-gradient-to-br from-white via-gray-50 to-gray-100 py-32 overflow-hidden"
-    >
-      {/* 상단 웨이브 경계 */}
-      <div className="absolute top-0 left-0 w-full overflow-hidden leading-none rotate-180 z-0">
-        <svg viewBox="0 0 1440 120" className="w-full h-24 fill-white">
-          <path d="M0,32L48,48C96,64,192,96,288,90.7C384,85,480,43,576,32C672,21,768,43,864,69.3C960,96,1056,128,1152,122.7C1248,117,1344,75,1392,53.3L1440,32L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z" />
-        </svg>
-      </div>
-
-      <div className="relative z-10 max-w-2xl mx-auto px-6">
-        {/* 섹션 헤더 */}
-        <motion.h2
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          viewport={{ once: true }}
-          className="text-center text-6xl md:text-7xl font-light text-gray-900 mb-8 tracking-tight"
-        >
-          Contact
-        </motion.h2>
-
-        <motion.div
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          viewport={{ once: true }}
-          className="w-12 h-px bg-gray-900 mx-auto mb-16 origin-left"
-        />
-
-        {/* 정보 카드 */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          viewport={{ once: true }}
-          className="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-10 space-y-6"
-        >
-          <ContactItem icon={<Cake />} text="1997.05.12" />
-          <ContactItem
-            icon={<Mail />}
-            text="yhj0566@gmail.com"
-            href="mailto:yhj0566@gmail.com"
-          />
-          <ContactItem
-            icon={<Github />}
-            text="깃허브 바로가기"
-            href="https://github.com/uni-zun"
-          />
-          <ContactItem icon={<MapPin />} text="광주 각화동" />
-        </motion.div>
-      </div>
-    </section>
-  );
+function useClipboard(timeout = 1400) {
+  const [copied, setCopied] = useState(false);
+  const copy = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), timeout);
+    } catch (e) {
+      console.error("Clipboard copy failed:", e);
+    }
+  };
+  return { copied, copy };
 }
 
-function ContactItem({ icon, text, href }) {
+export default function Contact() {
+  const email = "yhj0566@gmail.com";
+  const github = "https://github.com/uni-zun";
+  const location = "Gwangju, Korea";
+  const birthday = "1997-05-12";
+
+  const { copied, copy } = useClipboard();
+  const prefersReducedMotion = useReducedMotion();
+
+  const sectionRef = useRef(null);
+  const titleRef = useRef(null);
+  const sectionInView = useInView(sectionRef, { once: true, margin: "-100px" });
+  const titleInView = useInView(titleRef, { once: true, margin: "-60px" });
+
+  const containerVariants = useMemo(
+    () => ({
+      hidden: { opacity: 0 },
+      visible: {
+        opacity: 1,
+        transition: {
+          staggerChildren: 0.08,
+          delayChildren: 0.15,
+          ease: [0.25, 0.46, 0.45, 0.94],
+        },
+      },
+    }),
+    []
+  );
+
+  const itemVariants = useMemo(
+    () => ({
+      hidden: { y: 30, opacity: 0 },
+      visible: {
+        y: 0,
+        opacity: 1,
+        transition: { type: "spring", stiffness: 400, damping: 35, mass: 0.8 },
+      },
+    }),
+    []
+  );
+
+  const hoverLift = prefersReducedMotion
+    ? {}
+    : { whileHover: { y: -2 }, whileTap: { scale: 0.98 } };
+  const cardBase =
+    "rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition hover:shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300";
+
   return (
-    <div className="flex items-center gap-4 group">
-      <div className="text-gray-700 group-hover:scale-105 transition-transform duration-200">
-        {icon}
-      </div>
-      {href ? (
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-lg text-gray-800 underline underline-offset-4 hover:text-gray-900 transition"
+    <motion.section
+      ref={sectionRef}
+      id="contact"
+      className="relative overflow-hidden bg-zinc-100 py-16"
+      initial="hidden"
+      animate={sectionInView ? "visible" : "hidden"}
+      variants={containerVariants}
+    >
+      <div className="mx-auto max-w-5xl px-6 relative">
+        {/* Title */}
+        <motion.div
+          ref={titleRef}
+          className="text-center mb-12"
+          variants={containerVariants}
+          initial="hidden"
+          animate={titleInView ? "visible" : "hidden"}
         >
-          {text}
-        </a>
-      ) : (
-        <span className="text-lg text-gray-800">{text}</span>
-      )}
-    </div>
+          <motion.h2
+            variants={itemVariants}
+            className="text-6xl md:text-7xl font-light text-zinc-900 tracking-tight mb-8"
+          >
+            Contact
+          </motion.h2>
+          <motion.div
+            variants={itemVariants}
+            className="w-16 h-px bg-zinc-900 mx-auto"
+          />
+        </motion.div>
+
+        {/* 카드 */}
+        <div className="grid gap-4 md:grid-cols-3">
+          {/* 이메일 */}
+          <motion.button
+            {...hoverLift}
+            onClick={() => copy(email)}
+            className={`${cardBase} min-h-32 flex items-start text-left group pb-10 relative`}
+            aria-label="이메일 복사"
+            title="클릭 시 이메일이 복사됩니다"
+          >
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-zinc-900 p-2 text-white">
+                <Mail className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <div>
+                <div className="text-sm text-zinc-500">Email</div>
+                <div className="font-medium text-zinc-900 flex items-center gap-2">
+                  {email}
+                  <Copy
+                    className="h-4 w-4 text-zinc-400 group-hover:text-zinc-700 transition"
+                    aria-hidden="true"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 토스트 */}
+            <motion.div
+              initial={false}
+              animate={
+                copied && !prefersReducedMotion
+                  ? { opacity: 1, y: 0 }
+                  : { opacity: copied ? 1 : 0, y: copied ? 0 : 4 }
+              }
+              className="pointer-events-none absolute left-5 bottom-4 rounded-full bg-zinc-50 px-3 py-1 text-xs text-zinc-600 shadow-sm"
+              aria-live="polite"
+            >
+              {copied ? "이메일이 복사되었습니다!" : " "}
+            </motion.div>
+          </motion.button>
+
+          {/* 깃허브 */}
+          <motion.a
+            {...hoverLift}
+            href={github}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${cardBase} min-h-32 flex items-start`}
+            aria-label="깃허브 프로필 새 탭에서 열기"
+            title="GitHub: uni-zun"
+          >
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-zinc-900 p-2 text-white">
+                <Github className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <div>
+                <div className="text-sm text-zinc-500">GitHub</div>
+                <div className="font-medium text-zinc-900">uni-zun</div>
+              </div>
+            </div>
+          </motion.a>
+
+          {/* 지역 / 생일 */}
+          <motion.div
+            {...hoverLift}
+            className={cardBase}
+            role="region"
+            aria-label="프로필 기본 정보"
+          >
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-zinc-900 p-2 text-white">
+                <MapPin className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <div>
+                <div className="text-sm text-zinc-500">Location</div>
+                <div className="font-medium text-zinc-900">{location}</div>
+              </div>
+            </div>
+
+            <div className="mt-4 flex items-center gap-3">
+              <div className="rounded-xl bg-zinc-900 p-2 text-white">
+                <CalendarDays className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <div>
+                <div className="text-sm text-zinc-500">Birthday</div>
+                <div className="font-medium text-zinc-900">{birthday}</div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* 하단 안내 */}
+        <div className="mt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-zinc-500">
+            협업/채용 관련 문의는 이메일로 보내주세요. 빠르게 답장드릴게요.
+          </p>
+        </div>
+      </div>
+    </motion.section>
   );
 }
