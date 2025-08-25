@@ -1,7 +1,15 @@
 // src/components/Contact.jsx
 import { useState, useMemo, useRef } from "react";
 import { motion, useReducedMotion, useInView } from "framer-motion";
-import { Mail, Github, MapPin, CalendarDays, Copy } from "lucide-react";
+import {
+  Mail,
+  Github,
+  MapPin,
+  CalendarDays,
+  Copy,
+  BookOpen,
+  ExternalLink,
+} from "lucide-react";
 
 function useClipboard(timeout = 1400) {
   const [copied, setCopied] = useState(false);
@@ -20,6 +28,8 @@ function useClipboard(timeout = 1400) {
 export default function Contact() {
   const email = "yhj0566@gmail.com";
   const github = "https://github.com/uni-zun";
+  const notion =
+    "https://detailed-rose-149.notion.site/1d5aaa9b05c28084a8f7d5954fb06520?source=copy_link";
   const location = "Gwangju, Korea";
   const birthday = "1997-05-12";
 
@@ -61,6 +71,7 @@ export default function Contact() {
   const hoverLift = prefersReducedMotion
     ? {}
     : { whileHover: { y: -2 }, whileTap: { scale: 0.98 } };
+
   const cardBase =
     "rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition hover:shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300";
 
@@ -73,10 +84,11 @@ export default function Contact() {
       animate={sectionInView ? "visible" : "hidden"}
       variants={containerVariants}
     >
+      {/* 상단 경계 그라데이션 */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 -top-6 h-12 bg-gradient-to-b from-black/5 to-transparent"
-      ></div>
+      />
       <div className="mx-auto max-w-5xl px-6 relative">
         {/* Title */}
         <motion.div
@@ -139,51 +151,84 @@ export default function Contact() {
             </motion.div>
           </motion.button>
 
-          {/* 깃허브 */}
-          <motion.a
+          {/* GitHub + Notion (구분선 없이 동일 간격) */}
+          <motion.div
             {...hoverLift}
-            href={github}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`${cardBase} min-h-32 flex items-start`}
-            aria-label="깃허브 프로필 새 탭에서 열기"
-            title="GitHub: uni-zun"
+            className={`${cardBase} min-h-32`}
+            role="region"
+            aria-label="깃허브 및 노션 링크"
           >
-            <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-zinc-900 p-2 text-white">
-                <Github className="h-5 w-5" aria-hidden="true" />
-              </div>
-              <div>
-                <div className="text-sm text-zinc-500">GitHub</div>
-                <div className="font-medium text-zinc-900">uni-zun</div>
-              </div>
-            </div>
-          </motion.a>
+            <div className="flex flex-col gap-3">
+              {/* GitHub */}
+              <a
+                href={github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 group"
+                aria-label="깃허브 프로필 새 탭에서 열기"
+                title="GitHub: uni-zun"
+              >
+                <div className="rounded-xl bg-zinc-900 p-2 text-white">
+                  <Github className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <div>
+                  <div className="text-sm text-zinc-500">GitHub</div>
+                  <div className="font-medium text-zinc-900 inline-flex items-center gap-1 group-hover:underline">
+                    uni-zun
+                    <ExternalLink className="h-3.5 w-3.5 text-zinc-400 group-hover:text-zinc-700 transition" />
+                  </div>
+                </div>
+              </a>
 
-          {/* 지역 / 생일 */}
+              {/* Notion */}
+              <a
+                href={notion}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 group"
+                aria-label="노션 포트폴리오 새 탭에서 열기"
+                title="Notion: 프로젝트/포트폴리오"
+              >
+                <div className="rounded-xl bg-zinc-900 p-2 text-white">
+                  <BookOpen className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <div>
+                  <div className="text-xs text-zinc-500">Notion</div>
+                  <div className="font-medium text-zinc-900 inline-flex items-center gap-1 group-hover:underline">
+                    포트폴리오 노션
+                    <ExternalLink className="h-3.5 w-3.5 text-zinc-400 group-hover:text-zinc-700 transition" />
+                  </div>
+                </div>
+              </a>
+            </div>
+          </motion.div>
+
+          {/* Location + Birthday (동일 간격) */}
           <motion.div
             {...hoverLift}
             className={cardBase}
             role="region"
             aria-label="프로필 기본 정보"
           >
-            <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-zinc-900 p-2 text-white">
-                <MapPin className="h-5 w-5" aria-hidden="true" />
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="rounded-xl bg-zinc-900 p-2 text-white">
+                  <MapPin className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <div>
+                  <div className="text-sm text-zinc-500">Location</div>
+                  <div className="font-medium text-zinc-900">{location}</div>
+                </div>
               </div>
-              <div>
-                <div className="text-sm text-zinc-500">Location</div>
-                <div className="font-medium text-zinc-900">{location}</div>
-              </div>
-            </div>
 
-            <div className="mt-4 flex items-center gap-3">
-              <div className="rounded-xl bg-zinc-900 p-2 text-white">
-                <CalendarDays className="h-5 w-5" aria-hidden="true" />
-              </div>
-              <div>
-                <div className="text-sm text-zinc-500">Birthday</div>
-                <div className="font-medium text-zinc-900">{birthday}</div>
+              <div className="flex items-center gap-3">
+                <div className="rounded-xl bg-zinc-900 p-2 text-white">
+                  <CalendarDays className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <div>
+                  <div className="text-sm text-zinc-500">Birthday</div>
+                  <div className="font-medium text-zinc-900">{birthday}</div>
+                </div>
               </div>
             </div>
           </motion.div>
