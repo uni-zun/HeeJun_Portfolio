@@ -21,13 +21,25 @@ import ProjectModal from "./ProjectModal";
 export default function Projects() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+
   const [currentProject, setCurrentProject] = useState(0);
   const [selectedProject, setSelectedProject] = useState(null);
-  const { scrollY } = useScroll();
 
-  // 스크롤 기반 애니메이션
-  const sectionFade = useTransform(scrollY, [1000, 1400], [0, 1]);
-  const sectionEnterY = useTransform(scrollY, [1000, 1400], [50, 0]);
+  // 양방향 스크롤 페이드/이동
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start 80%", "end 20%"],
+  });
+  const sectionFade = useTransform(
+    scrollYProgress,
+    [0, 0.2, 0.8, 1],
+    [0, 1, 1, 0]
+  );
+  const sectionEnterY = useTransform(
+    scrollYProgress,
+    [0, 0.2, 0.8, 1],
+    [50, 0, 0, -40]
+  );
 
   const projects = useMemo(
     () => [
@@ -126,10 +138,7 @@ export default function Projects() {
       hidden: { opacity: 0 },
       visible: {
         opacity: 1,
-        transition: {
-          staggerChildren: 0.15,
-          delayChildren: 0.2,
-        },
+        transition: { staggerChildren: 0.15, delayChildren: 0.2 },
       },
     }),
     []
@@ -137,30 +146,19 @@ export default function Projects() {
 
   const cardVariants = useMemo(
     () => ({
-      hidden: {
-        opacity: 0,
-        y: 40,
-        scale: 0.95,
-      },
+      hidden: { opacity: 0, y: 40, scale: 0.95 },
       visible: {
         opacity: 1,
         y: 0,
         scale: 1,
-        transition: {
-          type: "spring",
-          stiffness: 300,
-          damping: 30,
-        },
+        transition: { type: "spring", stiffness: 300, damping: 30 },
       },
     }),
     []
   );
 
   const slideVariants = {
-    enter: (direction) => ({
-      x: direction > 0 ? 300 : -300,
-      opacity: 0,
-    }),
+    enter: (direction) => ({ x: direction > 0 ? 300 : -300, opacity: 0 }),
     center: {
       x: 0,
       opacity: 1,
@@ -191,11 +189,15 @@ export default function Projects() {
       <motion.section
         ref={ref}
         className="min-h-screen bg-white py-32 relative overflow-hidden"
-        style={{
-          opacity: sectionFade,
-          y: sectionEnterY,
-        }}
+        style={{ opacity: sectionFade, y: sectionEnterY }}
       >
+        {/* ===== 상단 경계: 은은한 그라데이션 섀도우 ===== */}
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 -top-6 h-12 bg-gradient-to-b from-black/[0.06] to-transparent"
+          style={{ opacity: sectionFade }}
+        />
+
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           {/* 헤더 */}
           <motion.div
@@ -217,8 +219,7 @@ export default function Projects() {
           </motion.div>
 
           {/* 캐러셀 컨테이너 */}
-          <div className="relative max-w-4xl mx-auto">
-            {/* 이전/다음 버튼 - 아이콘만 */}
+          <div className="relative max-w-6xl mx-auto">
             <button
               onClick={prevProject}
               className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full hover:bg-white/20 transition"
@@ -235,7 +236,6 @@ export default function Projects() {
               <ChevronRight className="w-6 h-6 text-white" />
             </button>
 
-            {/* 캐러셀 슬라이드 */}
             <div
               className="relative overflow-hidden rounded-2xl"
               style={{ aspectRatio: "16/10" }}
@@ -265,23 +265,16 @@ export default function Projects() {
                   >
                     <div
                       className="relative w-full h-full bg-cover bg-center bg-no-repeat rounded-2xl shadow-2xl border border-white/20 overflow-hidden"
-                      style={{
-                        backgroundImage: `url(${project.image})`,
-                      }}
+                      style={{ backgroundImage: `url(${project.image})` }}
                     >
-                      {/* 오버레이 그라데이션 */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent group-hover:from-black/90 group-hover:via-black/40 transition-all duration-300" />
 
-                      {/* 우수상 뱃지 - 회색 유지 */}
                       {project.hasAward && (
                         <motion.div
                           className="absolute top-6 right-6 flex items-center gap-2 px-4 py-2 bg-gray-500/90 backdrop-blur-sm rounded-full shadow-lg"
                           initial={{ rotate: -10, scale: 0 }}
                           animate={{ rotate: 0, scale: 1 }}
-                          transition={{
-                            delay: 0.3,
-                            type: "spring",
-                          }}
+                          transition={{ delay: 0.3, type: "spring" }}
                         >
                           <Award className="w-5 h-5 text-white" />
                           <span className="text-sm font-bold text-white">
@@ -290,21 +283,17 @@ export default function Projects() {
                         </motion.div>
                       )}
 
-                      {/* 프로젝트 아이콘 */}
                       <div className="absolute top-6 left-6 p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
                         <IconComponent className="w-8 h-8 text-white/90" />
                       </div>
 
-                      {/* 프로젝트 번호 */}
                       <div className="absolute top-6 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full">
                         <span className="text-white/90 text-sm font-medium">
                           {currentProject + 1} / {projects.length}
                         </span>
                       </div>
 
-                      {/* 메인 콘텐츠 */}
                       <div className="relative z-10 h-full flex flex-col justify-end p-8 md:p-12">
-                        {/* 상단 정보 (호버 시 표시) */}
                         <motion.div
                           className="mb-6 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0"
                           initial={false}
@@ -318,7 +307,6 @@ export default function Projects() {
                             </span>
                           </div>
 
-                          {/* 기술스택 미리보기 */}
                           <div className="flex flex-wrap gap-3 mb-4">
                             {project.techStack.slice(0, 4).map((tech) => (
                               <span
@@ -335,7 +323,6 @@ export default function Projects() {
                             )}
                           </div>
 
-                          {/* 팀 정보 */}
                           <div className="flex items-center gap-6 text-white/80 text-base">
                             <div className="flex items-center gap-2">
                               <Users className="w-5 h-5" />
@@ -348,7 +335,6 @@ export default function Projects() {
                           </div>
                         </motion.div>
 
-                        {/* 하단 제목 (항상 표시) */}
                         <div>
                           <h3 className="text-4xl md:text-5xl font-bold text-white mb-4 group-hover:text-white/95 transition-colors drop-shadow-lg">
                             {project.title}
@@ -358,14 +344,12 @@ export default function Projects() {
                             {project.subtitle}
                           </p>
 
-                          {/* 자세히 보기 표시 */}
                           <div className="text-white/80 font-medium text-lg opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
                             자세히 보기 →
                           </div>
                         </div>
                       </div>
 
-                      {/* 이미지 로드 실패 시 폴백 */}
                       <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black items-center justify-center hidden">
                         <IconComponent className="w-24 h-24 text-white/40" />
                       </div>
@@ -375,7 +359,6 @@ export default function Projects() {
               </AnimatePresence>
             </div>
 
-            {/* 인디케이터 */}
             <div className="flex justify-center mt-8 gap-3">
               {projects.map((_, index) => (
                 <button
@@ -393,7 +376,6 @@ export default function Projects() {
         </div>
       </motion.section>
 
-      {/* 모달 */}
       <ProjectModal
         project={selectedProject}
         isOpen={!!selectedProject}

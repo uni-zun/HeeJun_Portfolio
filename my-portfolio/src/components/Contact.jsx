@@ -73,6 +73,10 @@ export default function Contact() {
       animate={sectionInView ? "visible" : "hidden"}
       variants={containerVariants}
     >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 -top-6 h-12 bg-gradient-to-b from-black/5 to-transparent"
+      ></div>
       <div className="mx-auto max-w-5xl px-6 relative">
         {/* Title */}
         <motion.div
